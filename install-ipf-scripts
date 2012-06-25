@@ -1,0 +1,55 @@
+#!/bin/sh
+
+DIST_PATH=`dirname "$0"`
+DIST_PATH=`cd "$DIST_PATH"; pwd`
+
+echo "This is installation script of IPF helpers"
+
+while true
+do
+    echo
+    echo "Please select installation path"
+    echo "    1. $HOME/bin (default)"
+    echo "    2. /usr/local/bin"
+    echo "    3. Custom directory"
+    echo -n 'Enter your choice [1,2,3]: '
+    read response
+
+    case $response in
+        ""|1)
+            destination=$HOME/bin
+            break
+            ;;
+        2)
+            destination=/usr/local/bin
+            break
+            ;;
+        3)
+            destination=''
+            break
+            ;;
+    esac
+done
+
+while [ -z $destination ]
+do
+    echo
+    echo -n 'Enter installation path: '
+    read destination
+
+    if [ ! -d $destination ]
+    then
+        destination=''
+    fi
+done
+
+SELF=`basename $0`
+for f in `ls $DIST_PATH`
+do
+    if [ "x$f" != "x$SELF" ]
+    then
+        rm -f $destination/$f
+        ln -s $DIST_PATH/$f $destination/
+    fi
+done
+
