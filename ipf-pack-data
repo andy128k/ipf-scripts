@@ -1,0 +1,22 @@
+#!/bin/sh
+
+pack_uploads () {
+    cd htdocs/media
+    tar -cf ../../upload.tar upload
+    cd ../..
+}
+
+dump_db () {
+    PARAMS=`ipf-db-params`
+    if [ -n "$PARAMS" ]
+    then
+        mysqldump $PARAMS > dump.sql
+    fi
+}
+
+pack_uploads
+dump_db
+rm -f working-data.tar
+tar -cf working-data.tar upload.tar dump.sql
+rm -f upload.tar dump.sql
+

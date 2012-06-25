@@ -1,0 +1,30 @@
+#!/bin/sh
+
+unpack_uploads () {
+    mv upload.tar htdocs/media
+    cd htdocs/media
+    tar -xf upload.tar
+    rm -f upload.tar
+    cd ../..
+}
+
+restore_db () {
+    PARAMS=`ipf-db-params`
+    if [ -n "$PARAMS" ]
+    then
+        mysql $PARAMS < dump.sql
+    fi
+}
+
+if [ -f working-data.tar ]
+then
+    rm -f upload.tar dump.sql
+    tar -xf working-data.tar
+    restore_db
+    rm -f dump.sql
+    unpack_uploads
+else
+    echo 'Error. No file working-data.tar is found'
+    false
+fi
+

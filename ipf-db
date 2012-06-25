@@ -1,0 +1,8 @@
+#!/bin/sh
+
+PARAMS=`ipf-db-params`
+if [ -n "$PARAMS" ]
+then
+    mysql $PARAMS
+fi
+
