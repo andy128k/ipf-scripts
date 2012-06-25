@@ -1,0 +1,50 @@
+#!/bin/bash
+
+PARAMS=-uroot
+
+case $# in
+    1)
+        DATABASE=$1
+        USER=$1
+        PASSWORD=$1
+        ;;
+    2)
+        DATABASE=$1
+        USER=$2
+        PASSWORD=$2
+        ;;
+    3)
+        DATABASE=$1
+        USER=$2
+        PASSWORD=$3
+        ;;
+    *)
+        echo "Usage: $0 <name>"
+        echo "   or: $0 <database> <login/password>"
+        echo "   or: $0 <database> <login> <password>"
+        exit 1
+        ;;
+esac
+
+echo "DATABASE: $DATABASE"
+echo "USER:     $USER"
+echo "PASSWORD: $PASSWORD"
+
+echo Dropping database...
+echo "drop database if exists $DATABASE" | mysql $PARAMS
+
+echo Dropping user...
+USER_EXISTS=`echo "select count(1) from mysql.user where user = '$USER'" | mysql $PARAMS -N`
+if [ "-$USER_EXISTS" != "-0" ]
+then
+    echo "revoke all on *.* from '$USER'@'localhost'" | mysql $PARAMS
+    echo "drop user '$USER'@'localhost'" | mysql $PARAMS
+fi
+
+echo Creating database...
+echo "create database $DATABASE" | mysql $PARAMS
+
+echo Creating user...
+echo "create user '$USER'@'localhost' identified by '$PASSWORD'" | mysql $PARAMS
+echo "grant all privileges on $DATABASE.* to '$USER'@'localhost'" | mysql $PARAMS
+
