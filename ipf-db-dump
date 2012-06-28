@@ -7,5 +7,5 @@ then
     exit 1
 fi
 
-mysql $PARAMS $*
+mysqldump $PARAMS > dump.sql
 
