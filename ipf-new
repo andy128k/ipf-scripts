@@ -34,6 +34,9 @@ mkdir project
 mkdir project/templates
 mkdir project/content
 mkdir tmp
+chmod 0777 tmp
+
+SECRET=`cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 40`
 
 cat > project/settings.php <<END
 <?php
@@ -50,7 +53,7 @@ return array(
     'upload_path' => \$project_root . '/htdocs/media/upload/',
     'admin_media_url' => '/media/admin/',
 
-    'secret_key' => '123456',
+    'secret_key' => '$SECRET',
 
     'debug' => false,
 
