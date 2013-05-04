@@ -63,6 +63,15 @@ return array(
         'IPF_Admin',
     ),
 
+    'template_context_processors' => array(
+        'IPF_Context_Auth',
+        'IPF_Context_Media',
+        'IPF_Context_AdminMedia',
+        'IPF_Context_Upload',
+        'IPF_Context_Version',
+        'IPF_Context_Current',
+    ),
+
     'middlewares' => array(
         'IPF_Middleware_Common',
         'IPF_Session_Middleware',
