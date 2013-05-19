@@ -44,6 +44,7 @@ cat > project/settings.php <<END
 \$project_root = dirname(__FILE__).DIRECTORY_SEPARATOR.'..';
 
 return array(
+    'app_base' => '',
     'dsn' => 'mysql://$NAME:$NAME@localhost/$NAME',
     'tmp' => \$project_root . '/tmp',
 
