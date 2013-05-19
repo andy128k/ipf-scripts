@@ -1,9 +1,20 @@
 #!/bin/sh
 
+find_dsn() {
+    settings=$1
+
+    dsn=`grep '^\$set\['\''dsn'\''\]' $settings`
+    [ -z "$dsn" ] || return 0
+
+    dsn=`grep ''\''dsn'\''\s*=>\s*' $settings`
+    [ -z "$dsn" ] || return 0
+
+    return 1
+}
+
 get_db_params () {
     settings=$1
-    dsn=`grep '^\$set\['\''dsn'\''\]' $settings`
-    [ -z "$dsn" ] && return 1
+    find_dsn $settings || return 1
 
     dsn=`echo $dsn | sed 's|.*//||'`
     login=`echo $dsn | sed 's|:.*||'`
