@@ -1,203 +1,43 @@
 #!/bin/bash
 
-IPF_PATH=~/projects/ipf
-
 case $# in
     1)
-        NAME=$1
+        PROJECTNAME=$1
         ;;
     2)
-        NAME=$1
-	IPF_PATH=$2
+        PROJECTNAME=$1
         ;;
     *)
         echo "Usage: $0 <name>"
-        echo "   or: $0 <name> <path-to-ipf>"
         exit 1
         ;;
 esac
 
-mkdir $NAME
-cd $NAME
-git init
-ln -s $IPF_PATH ipf
-mkdir htdocs
-cp $IPF_PATH/index.php htdocs
-mkdir htdocs/media
+USERNAME=`whoami`
+SECRET=`cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 40`
+
+git clone https://github.com/andy128k/ipf-project-template.git $PROJECTNAME
+
+cd $PROJECTNAME
 mkdir htdocs/media/upload
 chmod 0777 htdocs/media/upload
-cd htdocs/media
-ln -s ../../ipf/ipf/admin/media admin
-ln -s admin/tiny_mce tiny_mce
-cd ../..
-mkdir project
-mkdir project/templates
-mkdir project/content
 mkdir tmp
 chmod 0777 tmp
 
-SECRET=`cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 40`
+sed -i "s/<username>/$USERNAME/g" composer.json
+sed -i "s/<projectname>/$PROJECTNAME/g" composer.json
+sed -i "s/<projectname>/$PROJECTNAME/g" project/settings.php
+sed -i "s/<secret>/$SECRET/g" project/settings.php
 
-cat > project/settings.php <<END
-<?php
+composer update
 
-\$project_root = dirname(__FILE__).DIRECTORY_SEPARATOR.'..';
+cp project/vendor/andy128k/ipf/index.php htdocs/
 
-return array(
-    'app_base' => '',
-    'dsn' => 'mysql://$NAME:$NAME@localhost/$NAME',
-    'tmp' => \$project_root . '/tmp',
-
-    'media_url' => '/media/',
-    'media_path' => \$project_root . '/htdocs/media/',
-    'upload_url' => '/media/upload/',
-    'upload_path' => \$project_root . '/htdocs/media/upload/',
-    'admin_media_url' => '/media/admin/',
-
-    'secret_key' => '$SECRET',
-
-    'debug' => false,
-
-    'applications' => array(
-        'IPF_Session',
-        'IPF_Auth',
-        'IPF_Admin',
-    ),
-
-    'template_context_processors' => array(
-        'IPF_Context_Auth',
-        'IPF_Context_Media',
-        'IPF_Context_AdminMedia',
-        'IPF_Context_Upload',
-        'IPF_Context_Version',
-        'IPF_Context_Current',
-    ),
-
-    'middlewares' => array(
-        'IPF_Middleware_Common',
-        'IPF_Session_Middleware',
-    ),
-
-    'urls' => array(
-        array('prefix'=>'#^/admin/', 'urls' => IPF_Admin_App::urls()),
-        array('prefix'=>'', 'urls' => array(
-            array('regex'=>'#^/\$#', 'func' => 'Content_Views_Index'),
-        )),
-    ),
-);
-END
-
-cat > project/settings_local.php <<END
-<?php
-error_reporting(E_ALL);
-return array(
-    'debug' => true,
-);
-END
-
-cat > project/models.yml <<END
-options:
-    type: INNODB
-    collate: utf8_unicode_ci
-    charset: utf8
----
-#SiteElement:
-#    tableName: site_element
-#    columns:
-#        code:
-#            type: string(100)
-#            notblank: true
-#            notnull: true
-#        description:
-#            type: string(255)
-#            notblank: true
-#            notnull: true
-#        value:
-#            type: string
-#            html: true
----
-#Page:
-#    tableName: page
-#    columns:
-#        code:
-#            type: string(100)
-#            notblank: true
-#            notnull: true
-#        description:
-#            type: string(255)
-#        title:
-#            type: string(255)
-#        meta_keywords:
-#            type: string(255)
-#        meta_description:
-#            type: string(255)
-#        caption:
-#            type: string(255)
-#            notblank: true
-#            notnull: true
-#        content:
-#            type: string
-#            html: true
----
-END
-
-cat > project/content/app.php <<END
-<?php
-
-class Content_App extends IPF_Application
-{
-    public function __construct()
-    {
-        parent::__construct(array('models'=>array(
-            // 'SiteElement',
-            // 'Page',
-        )));
-    }
-
-    public function getTitle()
-    {
-        return 'Site Content';
-    }
-}
-END
-
-cat > project/content/views.php <<END
-<?php
-
-function Content_Views_Index(\$request, \$match)
-{
-    \$context = array();
-    return IPF_Shortcuts::RenderToResponse('index.html', \$context, \$request);
-}
-END
-
-cat > project/templates/index.html <<END
-<!DOCTYPE html>
-<h1>It Works!</h1>
-END
-
-cat > project/templates/404.html <<END
-<!DOCTYPE html>
-<h1>404</h1>
-END
-
-cat > project/templates/500.html <<END
-<!DOCTYPE html>
-<h1>500</h1>
-END
-
-cat > .gitignore <<END
-/ipf
-/tmp
-.DS_Store
-/htdocs/media/upload
-/project/settings_local.php
-/working-data.tar
-/fabfile.py
-/fabfile.pyc
-END
-
+rm -rf .git
+git init
 git add .
-git ci -m 'initial commit'
-cd ..
+git commit -m 'initial commit'
+
+echo ''
+echo IPF Project $PROJECTNAME was successfully created.
 
