@@ -19,7 +19,7 @@ SECRET=`cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 40`
 git clone https://github.com/andy128k/ipf-project-template.git $PROJECTNAME
 
 cd $PROJECTNAME
-mkdir htdocs/media/upload
+mkdir -p htdocs/media/upload
 chmod 0777 htdocs/media/upload
 mkdir tmp
 chmod 0777 tmp
